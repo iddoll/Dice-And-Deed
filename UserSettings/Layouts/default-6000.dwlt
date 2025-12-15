@@ -119,7 +119,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 112
+  controlID: 108
   draggingID: 0
 --- !u!114 &6
 MonoBehaviour:
@@ -222,8 +222,8 @@ MonoBehaviour:
     y: 0
     width: 365
     height: 288
-  m_MinSize: {x: 200, y: 200}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 201, y: 226}
+  m_MaxSize: {x: 4001, y: 4026}
   m_ActualView: {fileID: 17}
   m_Panes:
   - {fileID: 17}
@@ -1789,9 +1789,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 78880000
+      m_SelectedIDs: 58aa0000
       m_LastClickedID: 0
-      m_ExpandedIDs: fefaffff
+      m_ExpandedIDs: 3827ffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1863,7 +1863,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Scripts/Systems
+    - Assets/Scripts/Cards
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -1873,16 +1873,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 60
   m_LastFolders:
-  - Assets/Scripts/Systems
+  - Assets/Scripts/Cards
   m_LastFoldersGridSize: 60
-  m_LastProjectPath: D:\GitHub\Dice And Deed
+  m_LastProjectPath: D:\GitHub\Dice-And-Deed
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: aab70000
-    m_LastClickedID: 47018
-    m_ExpandedIDs: 000000004eb60000a6b7000000ca9a3b
+    m_SelectedIDs: 9e090100
+    m_LastClickedID: 67998
+    m_ExpandedIDs: 0000000092f800009019010000ca9a3b
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1911,7 +1911,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 000000004eb60000
+    m_ExpandedIDs: 
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1939,7 +1939,7 @@ MonoBehaviour:
   m_ListAreaState:
     m_SelectedInstanceIDs: 
     m_LastClickedInstanceID: 0
-    m_HadKeyboardFocusLastEvent: 1
+    m_HadKeyboardFocusLastEvent: 0
     m_ExpandedInstanceIDs: c62300002e610000326000007060000018610000e6600000e4600000ea600000b6600000086100000c61000056670000126a0000046a00008a610000d6650000146a0000d4610000746c0000f46200002a6300006e610000506400003e640000446200001c6400008c620000806200004e6200001a6300009a620000de6b00003e620000a86100003c74000000740000c0730000ee740000267500008e7a0000a071000090af0000f2c0000080b30000b8af000050ae00006cb400003eb0000038b10000f8b9000086c7000094b00000eaaf00004ab400008eb9000000000000b05701003cd800001edf0000ec050100fe24010024d700007eb60000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
