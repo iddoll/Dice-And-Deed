@@ -13,4 +13,14 @@ public class CombatCalculator : MonoBehaviour
     {
         
     }
+
+    public static int CalculateDamage(Unit attacker, Unit defender)
+    {
+        return 10;
+    }
+
+    public static  void ApplyDamage(Unit attacker, Unit defender, int damage)
+    {
+        defender.Health -= damage;
+    }
 }

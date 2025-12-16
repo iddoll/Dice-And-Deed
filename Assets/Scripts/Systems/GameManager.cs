@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using System.Collections.Generic;
 
 public enum CombatPhase
 {
@@ -8,15 +10,36 @@ public enum CombatPhase
 }
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance {get; private set;}
+    public GridManager gridManager;
+    
     [SerializeField] CombatPhase currentPhase;
-    [SerializeField] bool isPlayerTurn;
-        
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public int currentUnitIndex;
+    
+    private List<Unit> unitList;
+    
+    public void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
+
+    public void Start()
+    {
+        InitializeGame();
+        Invoke("TestAttack", 3f);
+    }
+    public void InitializeGame()
+    {
+        unitList = new List<Unit>();
+        unitList = gridManager.GetAllUnits();
+        StartTurn();
+    }
+
     public void StartTurn()
     {
         currentPhase = CombatPhase.StartTurnPhase;
         Debug.Log($"--- НОВИЙ ХІД ---. Фаза: {currentPhase}");
-        isPlayerTurn = true;
         ExecutePreparationPhase();
     }
 
@@ -30,7 +53,7 @@ public class GameManager : MonoBehaviour
 
     private void EndMainPhase()
     {
-        if (currentPhase == CombatPhase.MainPhase)
+        if (currentPhase != CombatPhase.MainPhase)
         {
             Debug.LogError("Спроба завершити фазу дій не в той час!");
             return;
@@ -42,8 +65,52 @@ public class GameManager : MonoBehaviour
     {
         currentPhase = CombatPhase.EndTurnPhase;
         // TODO: Логіка: скидання лімітів руху, перевірка умов перемоги
-        isPlayerTurn = false;
-        Debug.Log($"Хід завершено. Тепер хід: {(isPlayerTurn ? "Гравця" : "Опонента")}");
-        StartTurn();
+        UpdateUnitList();
+        Invoke("NextTurn", 1f);
+    }
+
+    public void NextTurn()
+    {
+        if (unitList.Count == 1) // Якщо гра завершена, просто виходимо
+        {
+            Debug.Log("Гра завершена достроково (WinCondition мав спрацювати раніше).");
+            return; 
+        }
+        currentUnitIndex++;
+        currentUnitIndex = currentUnitIndex % unitList.Count;
+        if (currentUnitIndex == 0)
+        {
+            StartTurn();
+        }
+        else
+        {
+            currentPhase = CombatPhase.MainPhase;
+            Debug.Log($"Розпочато хід: {unitList[currentUnitIndex].name}");
+        }
+    }
+
+    public void UpdateUnitList()
+    {
+        unitList = gridManager.GetAllUnits();
+        if (unitList.Count > 0)
+        {
+            currentUnitIndex = 0; 
+        }
+        CheckWinCondition();
+    }
+
+    public void CheckWinCondition()
+    {
+        if (unitList == null || unitList.Count == 1)
+        {
+            Debug.Log("ПЕРЕМОГА");
+        }
+    }
+
+    public void TestAttack()
+    {
+        Unit attacker = unitList[0];
+        gridManager.ExecuteAttack(attacker, 4, 4);
+        EndMainPhase();
     }
 }

@@ -14,6 +14,7 @@ public class Unit : MonoBehaviour
     public bool isAlive = true;
     public int ClassBonus;
     public int Health;
+    public string unitName;
     void Start()
     {
         
@@ -23,5 +24,11 @@ public class Unit : MonoBehaviour
     void Update()
     {
         
+    }
+    
+
+    public bool IsDead()
+    {
+        return Health <= 0;
     }
 }
