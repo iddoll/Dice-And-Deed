@@ -52,6 +52,7 @@
     <Compile Include="Assets\Scripts\Systems\CombatCalculator.cs" />
     <Compile Include="Assets\Scripts\Dice\DiceSystem.cs" />
     <Compile Include="Assets\Scripts\Cards\CardData.cs" />
+    <Compile Include="Assets\Scripts\Field\Tile.cs" />
     <None Include="C:\Program Files\Unity\Hub\Editor\6000.2.6f2\Editor\Data\Resources\PackageManager\BuiltInPackages\com.unity.modules.subsystems\package.json" />
     <None Include="Library\PackageCache\com.unity.render-pipelines.universal@1e1527b3a17b\package.json" />
     <None Include="C:\Program Files\Unity\Hub\Editor\6000.2.6f2\Editor\Data\Resources\PackageManager\BuiltInPackages\com.unity.modules.jsonserialize\package.json" />
