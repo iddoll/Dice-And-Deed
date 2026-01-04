@@ -2478,6 +2478,18 @@ MonoBehaviour:
   rows: 5
   columnSpacing: 2.5
   rowStep: {x: 0.5, y: 1.5}
+  availablePlayerUnits:
+  - {fileID: 11400000, guid: 2fb974ec39b5332478a5c0ec4f6ec6ff, type: 2}
+  - {fileID: 11400000, guid: 2fb974ec39b5332478a5c0ec4f6ec6ff, type: 2}
+  - {fileID: 11400000, guid: 2fb974ec39b5332478a5c0ec4f6ec6ff, type: 2}
+  - {fileID: 11400000, guid: 2fb974ec39b5332478a5c0ec4f6ec6ff, type: 2}
+  - {fileID: 11400000, guid: 2fb974ec39b5332478a5c0ec4f6ec6ff, type: 2}
+  availableEnemyUnits:
+  - {fileID: 11400000, guid: 29ed41ad583b5114bbe67c286910b553, type: 2}
+  - {fileID: 11400000, guid: 29ed41ad583b5114bbe67c286910b553, type: 2}
+  - {fileID: 11400000, guid: 29ed41ad583b5114bbe67c286910b553, type: 2}
+  - {fileID: 11400000, guid: 29ed41ad583b5114bbe67c286910b553, type: 2}
+  - {fileID: 11400000, guid: 29ed41ad583b5114bbe67c286910b553, type: 2}
   moveRangeColor: {r: 0, g: 1, b: 0, a: 0.5}
   attackRangeColor: {r: 1, g: 0, b: 0, a: 0.6}
 --- !u!1001 &2077428415

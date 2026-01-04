@@ -6,22 +6,19 @@ public class Tile : MonoBehaviour
     private Color _defaultColor;
     private bool _isHighlightedForMove;
     
-    public Color highlightColor = Color.yellow; // Колір підсвічування (можна змінити в інспекторі)
+    public Color hoverColor = Color.cyan; 
     public int x;
     public int y;
 
     void Start()
     {
         _renderer = GetComponent<SpriteRenderer>();
-        // Запам'ятовуємо початковий колір (зазвичай це білий)
         _defaultColor = _renderer.color;
-        Debug.Log($"Тайл ініціалізовано на координатах: {x}, {y}");
     }
     
     private void OnMouseEnter() 
     {
-        // Підсвічуємо лише якщо клітинка не чекає на хід
-        if (!_isHighlightedForMove) _renderer.color = highlightColor;
+        if (!_isHighlightedForMove) _renderer.color = hoverColor;
     }
     
     private void OnMouseExit() 
@@ -43,7 +40,47 @@ public class Tile : MonoBehaviour
 
     private void OnMouseDown()
     {
-        // Якщо зараз НЕ хід гравця — ігноруємо будь-які кліки по полю
+        // ЛІВИЙ КЛІК
+        HandleLeftClick();
+    }
+
+    private void OnMouseOver()
+    {
+        // ПРАВИЙ КЛІК (Видалення під час розстановки)
+        if (Input.GetMouseButtonDown(1)) 
+        {
+            if (GridManager.Instance.currentPhase == GamePhase.Placement)
+            {
+                Unit unitOnMe = GridManager.Instance.GetUnitAtPosition(x, y);
+                if (unitOnMe != null && unitOnMe.isPlayerUnit)
+                {
+                    GridManager.Instance.RemoveUnitAndRefund(unitOnMe, x, y);
+                }
+            }
+        }
+    }
+
+    private void HandleLeftClick()
+    {
+        // 1. ФАЗА РОЗСТАНОВКИ
+        if (GridManager.Instance.currentPhase == GamePhase.Placement)
+        {
+            if (GridManager.Instance.IsInPlacementZone(x, true))
+            {
+                if (GridManager.Instance.GetUnitAtPosition(x, y) == null)
+                {
+                    UnitData data = GridManager.Instance.GetNextAvailableUnit();
+                    if (data != null)
+                    {
+                        GridManager.Instance.SpawnUnit(data, x, y, true);
+                        GridManager.Instance.OnUnitPlaced();
+                    }
+                }
+            }
+            return;
+        }
+
+        // 2. ФАЗА БОЮ
         if (!TurnManager.Instance.isPlayerTurn) return;
 
         Unit unitOnMe = GridManager.Instance.GetUnitAtPosition(x, y);
@@ -59,7 +96,6 @@ public class Tile : MonoBehaviour
             }
             else GridManager.Instance.ClearSelection();
         }
-        // Гравець може обирати ТІЛЬКИ своїх юнітів
         else if (unitOnMe != null && unitOnMe.isPlayerUnit && unitOnMe.hasAction)
         {
             GridManager.Instance.SelectUnit(unitOnMe);

@@ -12,6 +12,7 @@ public class TurnManager : MonoBehaviour
 
     public TextMeshProUGUI timerText; // Посилання на текст у UI
 
+    private int _turnCycleCount = 1;
     void Awake() => Instance = this;
 
     void Start()
@@ -30,29 +31,43 @@ public class TurnManager : MonoBehaviour
         }
     }
 
-    public void EndTurn()
-    {
-        isPlayerTurn = !isPlayerTurn;
-        StartTurn();
-    }
-
     private void StartTurn()
     {
         _timer = turnDuration;
-        var allUnits = GridManager.Instance.GetAllUnits();
+    
+        // ПОЧАТОК ХОДУ
+        string side = isPlayerTurn ? "ГРАВЦЯ" : "ШІ";
+        Debug.Log($"<color=cyan><b>-ПОЧАТОК ХОДУ {side}-</b></color>");
 
+        var allUnits = GridManager.Instance.GetAllUnits();
         foreach (var unit in allUnits)
         {
-            unit.SetState(unit.isPlayerUnit == isPlayerTurn);
+            bool isThisUnitTurn = (unit.isPlayerUnit == isPlayerTurn);
+            unit.SetState(isThisUnitTurn);
+            if (isThisUnitTurn) unit.ExecuteAbilities(AbilityTrigger.OnTurnStart);
         }
 
         GridManager.Instance.ClearSelection();
+        if (!isPlayerTurn) StartCoroutine(EnemySimpleAI());
+    }
 
-        // ЯКЩО ЗАРАЗ ХІД КОМП'ЮТЕРА:
-        if (!isPlayerTurn)
+    public void EndTurn()
+    {
+        // РЕЗУЛЬТАТИ В КІНЦІ ХОДУ
+        Debug.Log("<color=orange><b>-ПО ЗАКІНЧЕННЮ ХОДУ ТАКІ РЕЗУЛЬТАТИ-</b></color>");
+        foreach (var unit in GridManager.Instance.GetAllUnits())
         {
-            StartCoroutine(EnemySimpleAI());
+            Debug.Log($"{unit.LogName} [{unit.curentHealth}] одиниць здоров'я стоїть на клітині [{unit.xPosition} {unit.yPosition}]");
         }
+
+        if (!isPlayerTurn) 
+        {
+            Debug.Log($"<color=yellow><b>-КІНЕЦЬ {_turnCycleCount}-ГО ХОДУ-</b></color>");
+            _turnCycleCount++;
+        }
+
+        isPlayerTurn = !isPlayerTurn;
+        StartTurn();
     }
 
     private System.Collections.IEnumerator EnemySimpleAI()
