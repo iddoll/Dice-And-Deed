@@ -18,3 +18,11 @@
 /[Oo]bj/
 /[Bb]uild/
 /Assets/AssetStoreTools/
+
+# Специфічні папки Unity, які потрібно додати
+/[Ll]ogs/
+/[Уу]sersettings/
+/[MemoryCaptures]/
+
+# Виключаємо файли звітів, які ми бачили на скріншоті
+*.log
