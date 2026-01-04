@@ -2,33 +2,51 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
+    // Твої існуючі поля
+    public enum Element { None, Fire, Water, Earth, Air }
+    public Element element;
+    public string unitName;
+    public int Health;
+    public int ClassBonus;
+    public bool isAlive = true;
     
-    public enum Element
-    {
-        
-    }
-
+    // Нові поля для системи
+    public bool isPlayerUnit;
+    public bool hasAction = true;
     public int xPosition;
     public int yPosition;
-    public Element element;
-    public bool isAlive = true;
-    public int ClassBonus;
-    public int Health;
-    public string unitName;
-    void Start()
+
+    private SpriteRenderer _sr;
+    private Color _baseColor;
+
+    // Метод ініціалізації через дані
+    public void Setup(UnitData data, bool isPlayer)
     {
+        unitName = data.unitName;
+        Health = data.baseHealth;
+        element = data.element;
+        ClassBonus = data.classBonus;
+        isPlayerUnit = isPlayer;
         
+        if (data.unitSprite != null)
+            GetComponent<SpriteRenderer>().sprite = data.unitSprite;
+            
+        InitBaseColor();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void InitBaseColor() 
     {
-        
+        if (_sr == null) _sr = GetComponent<SpriteRenderer>();
+        if (_sr != null) _baseColor = _sr.color;
     }
-    
 
-    public bool IsDead()
+    public void SetState(bool active)
     {
-        return Health <= 0;
+        hasAction = active;
+        if (_sr == null) _sr = GetComponent<SpriteRenderer>();
+        // Затемнення замість відбілювання
+        _sr.color = active ? _baseColor : new Color(_baseColor.r * 0.5f, _baseColor.g * 0.5f, _baseColor.b * 0.5f, 1f);
     }
+
+    public bool IsDead() => Health <= 0;
 }

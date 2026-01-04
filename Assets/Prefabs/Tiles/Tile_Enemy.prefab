@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 527028498321697365}
   - component: {fileID: 6614625873720465087}
   - component: {fileID: 7753904270728022153}
+  - component: {fileID: -7634680495528633838}
   m_Layer: 0
   m_Name: Tile_Enemy
   m_TagString: Untagged
@@ -137,3 +138,18 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &-7634680495528633838
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1163888359007144169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfde2be4931c46f4b972ac97ae26b957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Tile
+  highlightColor: {r: 1, g: 0.14452153, b: 0.015686274, a: 1}
+  x: 0
+  y: 0

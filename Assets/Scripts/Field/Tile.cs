@@ -4,7 +4,8 @@ public class Tile : MonoBehaviour
 {
     private SpriteRenderer _renderer;
     private Color _defaultColor;
-
+    private bool _isHighlightedForMove;
+    
     public Color highlightColor = Color.yellow; // Колір підсвічування (можна змінити в інспекторі)
     public int x;
     public int y;
@@ -16,31 +17,52 @@ public class Tile : MonoBehaviour
         _defaultColor = _renderer.color;
         Debug.Log($"Тайл ініціалізовано на координатах: {x}, {y}");
     }
-
+    
     private void OnMouseEnter() 
     {
-        // Змінюємо колір на колір підсвічування
-        _renderer.color = highlightColor;
+        // Підсвічуємо лише якщо клітинка не чекає на хід
+        if (!_isHighlightedForMove) _renderer.color = highlightColor;
     }
     
     private void OnMouseExit() 
     {
-        // Повертаємо початковий колір
+        if (!_isHighlightedForMove) _renderer.color = _defaultColor;
+    }
+
+    public void SetHighlightColor(Color color)
+    {
+        _isHighlightedForMove = true;
+        _renderer.color = color;
+    }
+
+    public void ResetColor()
+    {
+        _isHighlightedForMove = false;
         _renderer.color = _defaultColor;
     }
 
     private void OnMouseDown()
     {
-        // Викликаємо метод менеджера, щоб дізнатися, хто тут стоїть
+        // Якщо зараз НЕ хід гравця — ігноруємо будь-які кліки по полю
+        if (!TurnManager.Instance.isPlayerTurn) return;
+
         Unit unitOnMe = GridManager.Instance.GetUnitAtPosition(x, y);
 
-        if (unitOnMe != null)
+        if (GridManager.Instance.SelectedUnit != null)
         {
-            Debug.Log($"[{x}, {y}] Тут стоїть: {unitOnMe.unitName} (HP: {unitOnMe.Health})");
+            if (GridManager.Instance.IsTileHighlightedForMove(x, y))
+            {
+                if (unitOnMe == null)
+                    GridManager.Instance.MoveSelectedUnitTo(x, y);
+                else if (unitOnMe.isPlayerUnit != GridManager.Instance.SelectedUnit.isPlayerUnit)
+                    GridManager.Instance.AttackWithSelectedUnit(x, y);
+            }
+            else GridManager.Instance.ClearSelection();
         }
-        else
+        // Гравець може обирати ТІЛЬКИ своїх юнітів
+        else if (unitOnMe != null && unitOnMe.isPlayerUnit && unitOnMe.hasAction)
         {
-            Debug.Log($"[{x}, {y}] Клітинка порожня");
+            GridManager.Instance.SelectUnit(unitOnMe);
         }
     }
 }

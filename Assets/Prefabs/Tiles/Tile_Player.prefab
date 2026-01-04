@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 185919690339962846}
   - component: {fileID: 2326059752007315243}
   - component: {fileID: -4558836975876006331}
+  - component: {fileID: -8432063026476252136}
   m_Layer: 0
   m_Name: Tile_Player
   m_TagString: Untagged
@@ -137,3 +138,18 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &-8432063026476252136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1955146177198977327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfde2be4931c46f4b972ac97ae26b957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Tile
+  highlightColor: {r: 0, g: 0.30280232, b: 1, a: 1}
+  x: 0
+  y: 0
