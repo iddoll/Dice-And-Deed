@@ -49,6 +49,14 @@ public class GridManager : MonoBehaviour
     public GameObject startBattleButton;
     public GameObject endTurnButton;
     
+    [Header("Timers")]
+    public float placementTime = 30f; // Час на розстановку
+    public float turnTime = 20f;      // Час на хід
+    private float _currentTime;
+    private bool _isTimerActive = true;
+    
+    public TMPro.TextMeshProUGUI timerText; // Признач об'єкт "118" сюди
+    
     void Awake()
     {
         Instance = this;
@@ -60,8 +68,29 @@ public class GridManager : MonoBehaviour
     void Start()
     {
         GenerateVisualGrid();
+        
+        // На старті розстановки:
+        if (startBattleButton != null) startBattleButton.SetActive(true);
+        if (endTurnButton != null) endTurnButton.SetActive(false); // Ховаємо кнопку бою
     }
-
+    // В Update GridManager залиш ТІЛЬКИ логіку для Placement
+    void Update()
+    {
+        if (currentPhase == GamePhase.Placement)
+        {
+            placementTime -= Time.deltaTime;
+            if (timerText != null) timerText.text = Mathf.CeilToInt(placementTime).ToString();
+    
+            if (placementTime <= 0) StartBattlePhase();
+        }
+    }
+    
+    // Додай цей метод, щоб TurnManager міг скидати таймер
+    public void ResetTurnTimer(float time)
+    {
+        // Ми будемо використовувати TurnManager для керування часом у бою
+    }
+    
     private void GenerateVisualGrid()
     {
         float midCol = playerColumns + (commonColumns - 1) / 2f;
@@ -92,46 +121,35 @@ public class GridManager : MonoBehaviour
     
     public void StartBattlePhase()
     {
-        // Отримуємо реальну кількість юнітів на полі
+        if (currentPhase == GamePhase.Battle) return; // Запобігаємо повторному запуску
+    
         int realUnitCount = GetAllUnits().Count;
-        
-        // Якщо на полі немає жодного юніта — не пускаємо в бій
-        if (realUnitCount == 0) 
-        {
-            Debug.LogWarning("Неможливо почати бій: виставте хоча б одного юніта!");
-            return;
-        }
-        
-        if (GameManager.Instance == null) 
-        {
-            Debug.LogError("GameManager не знайдено на сцені!");
-            return; 
-        }
+        if (realUnitCount == 0) return;
     
         currentPhase = GamePhase.Battle;
-        
-        // Повертаємо яскравість усім тайлам (як на image_c6e040.jpg)
-        foreach (var tile in _tilesOnGrid)
+    
+        // Оновлення UI
+        if (startBattleButton != null) startBattleButton.SetActive(false);
+        if (endTurnButton != null) 
         {
-            if (tile != null) tile.SetDim(false);
+            endTurnButton.SetActive(true);
+            // Важливо: Оновлюємо посилання в TurnManager, якщо воно збилося
+            TurnManager.Instance.endTurnButton = endTurnButton.GetComponent<UnityEngine.UI.Button>();
         }
     
-        SpawnEnemyUnitsRandomly();
-        
-        // Ховаємо кнопку старту і показуємо кнопку завершення ходу
-        if(startBattleButton != null) startBattleButton.SetActive(false);
-        if(endTurnButton != null) endTurnButton.SetActive(true);
+        foreach (var tile in _tilesOnGrid) if (tile != null) tile.SetDim(false);
     
-        GameManager.Instance.OnBattleStarted();
-        Debug.Log("Бій розпочато!");
+        SpawnEnemyUnitsRandomly();
+        TurnManager.Instance.OnBattleStarted();
     }
 
     public void ResetAllTilesToDefault()
     {
         foreach (Tile t in _tilesOnGrid)
         {
-            t.SetBaseColor(Color.white);
-            t.ResetColor();
+            if (t == null) continue;
+            t.SetBaseColor(Color.white); // Тепер цей метод існує
+            t.ResetColor(); // Поверне яскравість або затемнення згідно фази
         }
     }
     // --- Placement Logic ---

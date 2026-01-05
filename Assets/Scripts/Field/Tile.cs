@@ -6,6 +6,7 @@ public class Tile : MonoBehaviour
     private Color _originalColor; 
     private bool _isHighlightedForMove;
     private static Tile _draggingSource; 
+    private Vector3 _startDragPosition; // Початкова позиція юніта
 
     public Color hoverColor = Color.cyan; 
     public int x;
@@ -23,8 +24,7 @@ public class Tile : MonoBehaviour
         _originalColor = color;
         if (!_isHighlightedForMove) _renderer.color = color;
     }
-
-    // Метод для затемнення/освітлення
+    
     public void SetDim(bool dim)
     {
         if (_renderer == null) _renderer = GetComponent<SpriteRenderer>();
@@ -40,27 +40,10 @@ public class Tile : MonoBehaviour
     public void ResetColor()
     {
         _isHighlightedForMove = false;
-        
-        // Повертаємо колір з урахуванням фази
         if (GridManager.Instance.currentPhase == GamePhase.Placement)
-        {
-            bool shouldBeDim = !GridManager.Instance.IsInPlacementZone(x, true);
-            SetDim(shouldBeDim);
-        }
+            SetDim(!GridManager.Instance.IsInPlacementZone(x, true));
         else
-        {
             SetDim(false);
-        }
-    }
-
-    private void OnMouseEnter() 
-    {
-        if (!_isHighlightedForMove && _renderer != null) _renderer.color = hoverColor;
-    }
-    
-    private void OnMouseExit() 
-    {
-        if (!_isHighlightedForMove) ResetColor();
     }
 
     private void OnMouseDown()
@@ -71,55 +54,80 @@ public class Tile : MonoBehaviour
             if (unitOnMe != null && unitOnMe.isPlayerUnit)
             {
                 _draggingSource = this;
-                _renderer.color = Color.yellow; // Візуальний відгук
+                _startDragPosition = unitOnMe.transform.position;
+                _renderer.color = Color.yellow;
             }
-            else 
-            {
-                GridManager.Instance.HandlePlacementClick(x, y);
-            }
+            else GridManager.Instance.HandlePlacementClick(x, y);
         }
-        else 
+        else HandleLeftClick();
+    }
+
+    private void OnMouseDrag()
+    {
+        if (GridManager.Instance.currentPhase == GamePhase.Placement && _draggingSource == this)
         {
-            HandleLeftClick();
+            Unit unitToDrag = GridManager.Instance.GetUnitAtPosition(x, y);
+            if (unitToDrag != null)
+            {
+                Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                unitToDrag.transform.position = new Vector3(mousePos.x, mousePos.y, -0.5f);
+            }
         }
     }
 
     private void OnMouseUp()
     {
-        if (GridManager.Instance.currentPhase == GamePhase.Placement && _draggingSource != null)
+        if (GridManager.Instance.currentPhase == GamePhase.Placement && _draggingSource == this)
         {
+            Unit draggedUnit = GridManager.Instance.GetUnitAtPosition(x, y);
             Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
             
+            bool success = false;
             if (hit.collider != null)
             {
                 Tile targetTile = hit.collider.GetComponent<Tile>();
-                if (targetTile != null) 
+                if (targetTile != null && GridManager.Instance.IsInPlacementZone(targetTile.x, true))
                 {
                     GridManager.Instance.SwapOrMoveUnits(_draggingSource, targetTile);
+                    success = true;
                 }
             }
+
+            // Якщо не влучили в тайл або зона ворожа — повертаємо юніта назад
+            if (!success && draggedUnit != null)
+                draggedUnit.transform.position = _startDragPosition;
+
             _draggingSource.ResetColor();
             _draggingSource = null;
         }
     }
 
-    private void HandleLeftClick() 
+    // Решта методів (OnMouseEnter, HandleLeftClick) залишаються без змін
+    private void OnMouseEnter() { if (!_isHighlightedForMove && _renderer != null) _renderer.color = hoverColor; }
+    private void OnMouseExit() { if (!_isHighlightedForMove) ResetColor(); }
+    private void HandleLeftClick()
     {
-        if (!TurnManager.Instance.isPlayerTurn) return;
-        Unit unitOnMe = GridManager.Instance.GetUnitAtPosition(x, y);
-
-        if (GridManager.Instance.SelectedUnit != null)
+        // Якщо фаза БОЮ
+        if (GridManager.Instance.currentPhase == GamePhase.Battle)
         {
-            if (GridManager.Instance.IsTileHighlightedForMove(x, y))
+            // Дозволяємо виділяти юніта ТІЛЬКИ якщо зараз хід гравця
+            if (!TurnManager.Instance.isPlayerTurn) return;
+    
+            Unit unitOnTile = GridManager.Instance.GetUnitAtPosition(x, y);
+            Unit selected = GridManager.Instance.SelectedUnit;
+    
+            if (unitOnTile != null && unitOnTile.isPlayerUnit && unitOnTile.hasAction)
             {
-                if (unitOnMe == null) GridManager.Instance.MoveSelectedUnitTo(x, y);
-                else if (unitOnMe.isPlayerUnit != GridManager.Instance.SelectedUnit.isPlayerUnit)
-                    GridManager.Instance.AttackWithSelectedUnit(x, y);
+                GridManager.Instance.SelectUnit(unitOnTile);
             }
-            else GridManager.Instance.ClearSelection();
+            else if (selected != null && GridManager.Instance.IsTileHighlightedForMove(x, y))
+            {
+                if (unitOnTile != null && !unitOnTile.isPlayerUnit)
+                    GridManager.Instance.AttackWithSelectedUnit(x, y);
+                else
+                    GridManager.Instance.MoveSelectedUnitTo(x, y);
+            }
         }
-        else if (unitOnMe != null && unitOnMe.isPlayerUnit && unitOnMe.hasAction)
-            GridManager.Instance.SelectUnit(unitOnMe);
     }
 }

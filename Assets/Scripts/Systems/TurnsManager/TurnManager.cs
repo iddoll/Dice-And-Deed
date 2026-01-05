@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -6,68 +7,75 @@ public class TurnManager : MonoBehaviour
 {
     public static TurnManager Instance;
 
-    public float turnDuration = 30f;
+    public float turnDuration = 20f;
     private float _timer;
     public bool isPlayerTurn = true;
+    private bool _isBattleActive = false;
 
-    public TextMeshProUGUI timerText; // Посилання на текст у UI
+    public TextMeshProUGUI timerText; 
+    public Button endTurnButton; // Пряме посилання на компонент Button
 
-    private int _turnCycleCount = 1;
     void Awake() => Instance = this;
 
-    void Start()
+    public void OnBattleStarted()
     {
+        _isBattleActive = true;
         StartTurn();
     }
 
     void Update()
     {
+        if (!_isBattleActive) return;
+
         _timer -= Time.deltaTime;
         if (timerText != null) timerText.text = Mathf.CeilToInt(_timer).ToString();
 
-        if (_timer <= 0)
-        {
-            EndTurn();
-        }
+        if (_timer <= 0) EndTurn();
     }
 
     private void StartTurn()
     {
         _timer = turnDuration;
-    
-        // ПОЧАТОК ХОДУ
-        string side = isPlayerTurn ? "ГРАВЦЯ" : "ШІ";
-        Debug.Log($"<color=cyan><b>-ПОЧАТОК ХОДУ {side}-</b></color>");
+             
+             // Якщо кнопки немає в інспекторі, шукаємо її за тегом або через GridManager
+             if (endTurnButton == null && GridManager.Instance.endTurnButton != null)
+             {
+                 endTurnButton = GridManager.Instance.endTurnButton.GetComponent<UnityEngine.UI.Button>();
+             }
+         
+             if (endTurnButton != null)
+             {
+                 endTurnButton.gameObject.SetActive(true); // Гарантуємо, що вона видима
+                 endTurnButton.interactable = isPlayerTurn;
+             }
 
         var allUnits = GridManager.Instance.GetAllUnits();
         foreach (var unit in allUnits)
         {
-            bool isThisUnitTurn = (unit.isPlayerUnit == isPlayerTurn);
-            unit.SetState(isThisUnitTurn);
-            if (isThisUnitTurn) unit.ExecuteAbilities(AbilityTrigger.OnTurnStart);
+            if (unit.isPlayerUnit == isPlayerTurn) 
+                {
+                    unit.SetState(true);
+                    unit.hasAction = true;
+                }
         }
 
-        GridManager.Instance.ClearSelection();
         if (!isPlayerTurn) StartCoroutine(EnemySimpleAI());
     }
 
     public void EndTurn()
     {
-        // РЕЗУЛЬТАТИ В КІНЦІ ХОДУ
-        Debug.Log("<color=orange><b>-ПО ЗАКІНЧЕННЮ ХОДУ ТАКІ РЕЗУЛЬТАТИ-</b></color>");
-        foreach (var unit in GridManager.Instance.GetAllUnits())
-        {
-            Debug.Log($"{unit.LogName} [{unit.curentHealth}] одиниць здоров'я стоїть на клітині [{unit.xPosition} {unit.yPosition}]");
-        }
-
-        if (!isPlayerTurn) 
-        {
-            Debug.Log($"<color=yellow><b>-КІНЕЦЬ {_turnCycleCount}-ГО ХОДУ-</b></color>");
-            _turnCycleCount++;
-        }
-
+        if (!_isBattleActive) return;
         isPlayerTurn = !isPlayerTurn;
         StartTurn();
+    }
+    
+    public void SetPlayerTurn(bool isPlayer)
+    {
+        isPlayerTurn = isPlayer;
+        if (endTurnButton != null) endTurnButton.interactable = isPlayerTurn;
+        
+        // Скидаємо таймер прямо тут
+        _timer = turnDuration; 
     }
 
     private System.Collections.IEnumerator EnemySimpleAI()
