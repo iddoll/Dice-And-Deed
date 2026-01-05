@@ -45,6 +45,27 @@ public class GridManager : MonoBehaviour
     private int _globalUnitCount = 1;
     public Unit SelectedUnit => _selectedUnit;
 
+    [Header("UI Elements")]
+    public GameObject startBattleButton;
+    public GameObject endTurnButton;
+
+    public void StartBattlePhase()
+    {
+        if (_unitsPlaced == 0) return;
+
+        currentPhase = GamePhase.Battle;
+        SpawnEnemyUnitsRandomly();
+
+        // ПЕРЕМИКАЄМО КНОПКИ
+        if(startBattleButton != null) startBattleButton.SetActive(false);
+        if(endTurnButton != null) endTurnButton.SetActive(true);
+
+        Debug.Log("<color=green>--- ФАЗА БОЮ ПОЧАЛАСЯ ---</color>");
+
+        // Запускаємо логіку черговості
+        GameManager.Instance.OnBattleStarted();
+    }
+    
     void Awake()
     {
         Instance = this;
@@ -97,20 +118,7 @@ public class GridManager : MonoBehaviour
             return availablePlayerUnits[_currentUnitIndex];
         return null;
     }
-
-    public void OnUnitPlaced()
-    {
-        _currentUnitIndex++;
-        _unitsPlaced++;
-
-        if (_unitsPlaced >= MaxUnits)
-        {
-            Debug.Log("Всі юніти розставлені. Спавним ворогів!");
-            SpawnEnemyUnitsRandomly();
-            currentPhase = GamePhase.Battle;
-        }
-    }
-
+    
     public void RemoveUnitAndRefund(Unit unit, int x, int y)
     {
         _unitsOnGrid[x, y] = null;
@@ -275,9 +283,15 @@ public class GridManager : MonoBehaviour
     public void MoveSelectedUnitTo(int targetX, int targetY)
     {
         if (_selectedUnit == null) return;
+    
+        // Передаємо старі координати та нові
         if (MoveUnit(_selectedUnit, _selectedUnit.xPosition, _selectedUnit.yPosition, targetX, targetY))
         {
-            _selectedUnit.SetState(false); 
+            // Тільки в фазі бою юніт втрачає можливість діяти після ходу
+            if (currentPhase == GamePhase.Battle)
+            {
+                _selectedUnit.SetState(false); 
+            }
             ClearSelection();
         }
     }
@@ -296,5 +310,49 @@ public class GridManager : MonoBehaviour
             Destroy(target.gameObject);
         }
         return true;
+    }
+    
+    // --- Додай ці методи та зміни в GridManager ---
+
+// 1. Видали автоматичний перехід у OnUnitPlaced
+    public void OnUnitPlaced()
+    {
+        _currentUnitIndex++;
+        _unitsPlaced++;
+        // Видалили SpawnEnemyUnitsRandomly та currentPhase = GamePhase.Battle
+    }
+    
+// 3. Логіка вільної перестановки під час Placement
+    private Unit _unitToSwap;
+
+    public void HandlePlacementClick(int x, int y)
+    {
+        Unit unitOnTile = GetUnitAtPosition(x, y);
+
+        // Якщо ми вже вибрали юніта і клацаємо на порожню клітину в зоні розстановки
+        if (_unitToSwap != null && unitOnTile == null)
+        {
+            if (IsInPlacementZone(x, true))
+            {
+                MoveUnit(_unitToSwap, _unitToSwap.xPosition, _unitToSwap.yPosition, x, y);
+                _unitToSwap = null;
+            }
+        }
+        // Якщо клітинка порожня і ми нікого не ведемо — спавнимо нового
+        else if (unitOnTile == null)
+        {
+            UnitData data = GetNextAvailableUnit();
+            if (data != null)
+            {
+                SpawnUnit(data, x, y, true);
+                OnUnitPlaced();
+            }
+        }
+        // Якщо клацаємо на свого юніта — вибираємо його для переміщення
+        else if (unitOnTile != null && unitOnTile.isPlayerUnit)
+        {
+            _unitToSwap = unitOnTile;
+            Debug.Log($"Вибрано {unitOnTile.LogName} для перестановки");
+        }
     }
 }

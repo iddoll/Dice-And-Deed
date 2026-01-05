@@ -65,18 +65,8 @@ public class Tile : MonoBehaviour
         // 1. ФАЗА РОЗСТАНОВКИ
         if (GridManager.Instance.currentPhase == GamePhase.Placement)
         {
-            if (GridManager.Instance.IsInPlacementZone(x, true))
-            {
-                if (GridManager.Instance.GetUnitAtPosition(x, y) == null)
-                {
-                    UnitData data = GridManager.Instance.GetNextAvailableUnit();
-                    if (data != null)
-                    {
-                        GridManager.Instance.SpawnUnit(data, x, y, true);
-                        GridManager.Instance.OnUnitPlaced();
-                    }
-                }
-            }
+            // Викликаємо універсальний метод менеджера (він сам розбереться: ставити чи рухати)
+            GridManager.Instance.HandlePlacementClick(x, y);
             return;
         }
 

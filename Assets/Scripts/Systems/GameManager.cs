@@ -24,10 +24,10 @@ public class GameManager : MonoBehaviour
         else Destroy(gameObject);
     }
 
-    public void Start()
+    public void OnBattleStarted()
     {
         InitializeGame();
-        Invoke("TestAttack", 3f);
+        Debug.Log("<color=yellow>GameManager: Логіка черговості ходів запущена!</color>");
     }
     public void InitializeGame()
     {
