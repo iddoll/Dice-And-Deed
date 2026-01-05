@@ -12,17 +12,33 @@
 /dataSources/
 /dataSources.local.xml
 
-# Unity Generated folders and files
+# Стандартні папки Unity
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
 /[Bb]uild/
-/Assets/AssetStoreTools/
-
-# Специфічні папки Unity, які потрібно додати
+/[Bb]uilds/
 /[Ll]ogs/
 /[Уу]sersettings/
-/[MemoryCaptures]/
+/[Mm]emoryCaptures/
 
-# Виключаємо файли звітів, які ми бачили на скріншоті
+# Папки середовищ розробки (IDE)
+.idea/
+*.iml
+/shelf/
+/workspace.xml
+/projectSettingsUpdater.xml
+/modules.xml
+/contentModel.xml
+.vs/
+.vscode/
+
+# Файли звітів та логів
 *.log
+
+# Тимчасові файли ОС
+.DS_Store
+Thumbs.db
+
+# Специфічні папки Asset Store
+/Assets/AssetStoreTools/
