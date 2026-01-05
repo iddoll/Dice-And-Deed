@@ -48,23 +48,6 @@ public class GridManager : MonoBehaviour
     [Header("UI Elements")]
     public GameObject startBattleButton;
     public GameObject endTurnButton;
-
-    public void StartBattlePhase()
-    {
-        if (_unitsPlaced == 0) return;
-
-        currentPhase = GamePhase.Battle;
-        SpawnEnemyUnitsRandomly();
-
-        // ПЕРЕМИКАЄМО КНОПКИ
-        if(startBattleButton != null) startBattleButton.SetActive(false);
-        if(endTurnButton != null) endTurnButton.SetActive(true);
-
-        Debug.Log("<color=green>--- ФАЗА БОЮ ПОЧАЛАСЯ ---</color>");
-
-        // Запускаємо логіку черговості
-        GameManager.Instance.OnBattleStarted();
-    }
     
     void Awake()
     {
@@ -83,7 +66,7 @@ public class GridManager : MonoBehaviour
     {
         float midCol = playerColumns + (commonColumns - 1) / 2f;
         float midRow = (rows - 1) / 2f;
-
+    
         for (int x = 0; x < _totalColumns; x++)
         {
             for (int y = 0; y < rows; y++)
@@ -98,12 +81,59 @@ public class GridManager : MonoBehaviour
                     tileScript.x = x;
                     tileScript.y = y;
                     _tilesOnGrid[x, y] = tileScript;
+                    
+                    // --- НОВЕ: Затемнюємо все, що не є зоною гравця ---
+                    bool isNotPlayerZone = !IsInPlacementZone(x, true);
+                    tileScript.SetDim(isNotPlayerZone);
                 }
-                tileGO.name = $"Tile_{x}_{y}";
             }
         }
     }
+    
+    public void StartBattlePhase()
+    {
+        // Отримуємо реальну кількість юнітів на полі
+        int realUnitCount = GetAllUnits().Count;
+        
+        // Якщо на полі немає жодного юніта — не пускаємо в бій
+        if (realUnitCount == 0) 
+        {
+            Debug.LogWarning("Неможливо почати бій: виставте хоча б одного юніта!");
+            return;
+        }
+        
+        if (GameManager.Instance == null) 
+        {
+            Debug.LogError("GameManager не знайдено на сцені!");
+            return; 
+        }
+    
+        currentPhase = GamePhase.Battle;
+        
+        // Повертаємо яскравість усім тайлам (як на image_c6e040.jpg)
+        foreach (var tile in _tilesOnGrid)
+        {
+            if (tile != null) tile.SetDim(false);
+        }
+    
+        SpawnEnemyUnitsRandomly();
+        
+        // Ховаємо кнопку старту і показуємо кнопку завершення ходу
+        if(startBattleButton != null) startBattleButton.SetActive(false);
+        if(endTurnButton != null) endTurnButton.SetActive(true);
+    
+        GameManager.Instance.OnBattleStarted();
+        Debug.Log("Бій розпочато!");
+    }
 
+    public void ResetAllTilesToDefault()
+    {
+        foreach (Tile t in _tilesOnGrid)
+        {
+            t.SetBaseColor(Color.white);
+            t.ResetColor();
+        }
+    }
     // --- Placement Logic ---
 
     public bool IsInPlacementZone(int x, bool isPlayer)
@@ -267,7 +297,37 @@ public class GridManager : MonoBehaviour
             }
         }
     }
-
+    
+   // Додай цей метод у GridManager
+   public void SwapOrMoveUnits(Tile source, Tile target)
+   {
+       // Перевірка, чи ціль у зоні розстановки
+       if (!IsInPlacementZone(target.x, true)) return;
+   
+       Unit unitA = GetUnitAtPosition(source.x, source.y);
+       Unit unitB = GetUnitAtPosition(target.x, target.y);
+   
+       if (unitB == null)
+       {
+           // Переміщення на порожню клітинку
+           MoveUnit(unitA, source.x, source.y, target.x, target.y);
+       }
+       else if (unitB.isPlayerUnit)
+       {
+           // Обмін місцями (Swap)
+           _unitsOnGrid[source.x, source.y] = unitB;
+           _unitsOnGrid[target.x, target.y] = unitA;
+   
+           unitA.xPosition = target.x; unitA.yPosition = target.y;
+           unitB.xPosition = source.x; unitB.yPosition = source.y;
+   
+           unitA.transform.position = GetWorldPosition(target.x, target.y) + new Vector3(0, 0, -0.1f);
+           unitB.transform.position = GetWorldPosition(source.x, source.y) + new Vector3(0, 0, -0.1f);
+           
+           Debug.Log($"Обмін: {unitA.LogName} <-> {unitB.LogName}");
+       }
+   }
+   
     public bool IsTileHighlightedForMove(int x, int y) => _highlightedTiles.Exists(t => t.x == x && t.y == y);
 
     public void AttackWithSelectedUnit(int targetX, int targetY)
@@ -308,7 +368,7 @@ public class GridManager : MonoBehaviour
         {
             _unitsOnGrid[target.xPosition, target.yPosition] = null;
             Destroy(target.gameObject);
-        }
+        }   
         return true;
     }
     
@@ -327,32 +387,47 @@ public class GridManager : MonoBehaviour
 
     public void HandlePlacementClick(int x, int y)
     {
+        // ПЕРЕВІРКА: чи клікаємо ми взагалі у свою зону?
+        // Якщо ні - ігноруємо клік повністю
+        if (!IsInPlacementZone(x, true)) 
+        {
+            Debug.LogWarning("Ви можете розставляти війська лише у своїй зоні (сині клітинки)!");
+            return; 
+        }
+    
         Unit unitOnTile = GetUnitAtPosition(x, y);
-
-        // Якщо ми вже вибрали юніта і клацаємо на порожню клітину в зоні розстановки
+    
+        // 1. Перестановка існуючого юніта
         if (_unitToSwap != null && unitOnTile == null)
         {
-            if (IsInPlacementZone(x, true))
-            {
-                MoveUnit(_unitToSwap, _unitToSwap.xPosition, _unitToSwap.yPosition, x, y);
-                _unitToSwap = null;
-            }
+            // Оскільки ми вже перевірили IsInPlacementZone вище, 
+            // юніт переміститься лише всередині дозволеної зони
+            MoveUnit(_unitToSwap, _unitToSwap.xPosition, _unitToSwap.yPosition, x, y);
+            _unitToSwap = null;
         }
-        // Якщо клітинка порожня і ми нікого не ведемо — спавнимо нового
+        // 2. Спавн нового юніта
         else if (unitOnTile == null)
         {
-            UnitData data = GetNextAvailableUnit();
-            if (data != null)
-            {
-                SpawnUnit(data, x, y, true);
-                OnUnitPlaced();
-            }
+            // Додаємо перевірку кількості виставлених юнітів
+                if (GetAllUnits().Count < 5) 
+                {
+                    UnitData data = GetNextAvailableUnit();
+                    if (data != null)
+                    {
+                        SpawnUnit(data, x, y, true);
+                        OnUnitPlaced();
+                    }
+                }
+                else 
+                {
+                    Debug.Log("Максимальна кількість військ (5) вже на полі!");
+                }
         }
-        // Якщо клацаємо на свого юніта — вибираємо його для переміщення
+        // 3. Вибір для перестановки
         else if (unitOnTile != null && unitOnTile.isPlayerUnit)
         {
             _unitToSwap = unitOnTile;
-            Debug.Log($"Вибрано {unitOnTile.LogName} для перестановки");
+            Debug.Log($"Вибрано {unitOnTile.LogName} для перестановки. Оберіть вільну клітинку у своїй зоні.");
         }
     }
 }
