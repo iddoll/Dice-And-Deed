@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6c90ca7fbd908ad409d50485426b76c0, type: 3}
-  m_Name: FireMage
+  m_Name: WoodMage
   m_EditorClassIdentifier: Assembly-CSharp::UnitData
-  unitName: Fire Mage
-  element: 1
+  unitName: Wood Mage
+  element: 4
   unitClass: 2
-  projectilePrefab: {fileID: 4158835763729633456, guid: 84c282a9848df474e8bfe710cd7cb7bc, type: 3}
+  projectilePrefab: {fileID: 4437559026420976410, guid: 6738751eb783063488928acc27990bde, type: 3}
   attackRange: 2
   attackDamage: 20
   baseHealth: 100
-  baseDamage: 20
+  baseDamage: 30
   classBonus: 2
   description: 
-  unitSprite: {fileID: 21300000, guid: d5916469b95b8af458bd47c0cfc894a7, type: 3}
+  unitSprite: {fileID: 21300000, guid: 3f49e888474997c44b495fdc99db5a17, type: 3}
   abilities: []

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 public class Unit : MonoBehaviour
 {
+    public UnitData unitData;
     public enum Element { None, Fire, Ice, Lightning, Wood, Stone }
     public enum UnitClass { Tank, Archer, Mage, Assassin }
 
@@ -35,6 +36,7 @@ public class Unit : MonoBehaviour
     public string LogName => $"[{unitID}]{unitName}";
     public void Setup(UnitData data, bool isPlayer)
     {
+        unitData = data;
         unitName = data.unitName;
         element = data.element;
         unitClass = data.unitClass;

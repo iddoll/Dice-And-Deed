@@ -1,10 +1,22 @@
 fileFormatVersion: 2
-guid: d5916469b95b8af458bd47c0cfc894a7
+guid: f1ba2679d567b8d4ab1139e9696d62d0
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2624596502034751511
-    second: Fire_Mage_0
+      213: -4390124077346443278
+    second: units_0
+  - first:
+      213: 6740746108911773275
+    second: units_1
+  - first:
+      213: -8574539851516715941
+    second: units_2
+  - first:
+      213: 2388557222389631876
+    second: units_3
+  - first:
+      213: -6977839760269414065
+    second: units_4
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +49,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -46,12 +58,12 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
-  alignment: 9
-  spritePivot: {x: 0.5, y: 0}
-  spritePixelsToUnits: 32
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -75,7 +87,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -126,23 +138,111 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Fire_Mage_0
+      name: units_0
       rect:
         serializedVersion: 2
-        x: 2
+        x: 1
         y: 0
-        width: 29
-        height: 30
+        width: 26
+        height: 33
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9ef5c79136f839bd0800000000000000
-      internalID: -2624596502034751511
+      spriteID: 2ff20e959652313c0800000000000000
+      internalID: -4390124077346443278
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: units_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 26
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5668ce3fd0fb8d50800000000000000
+      internalID: 6740746108911773275
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: units_2
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 0
+        width: 27
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5c5ae55f6d110980800000000000000
+      internalID: -8574539851516715941
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: units_3
+      rect:
+        serializedVersion: 2
+        x: 114
+        y: 0
+        width: 24
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48b4a3e732cd52120800000000000000
+      internalID: 2388557222389631876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: units_4
+      rect:
+        serializedVersion: 2
+        x: 159
+        y: 0
+        width: 27
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f417b8d45bbb92f90800000000000000
+      internalID: -6977839760269414065
       vertices: []
       indices: 
       edges: []
@@ -151,8 +251,8 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
-    internalID: 1537655665
+    spriteID: 
+    internalID: 0
     vertices: []
     indices: 
     edges: []
@@ -161,7 +261,11 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Fire_Mage_0: -2624596502034751511
+      units_0: -4390124077346443278
+      units_1: 6740746108911773275
+      units_2: -8574539851516715941
+      units_3: 2388557222389631876
+      units_4: -6977839760269414065
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

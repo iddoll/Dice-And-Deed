@@ -8,6 +8,11 @@ public class UnitData : ScriptableObject
     public Unit.Element element;
     public Unit.UnitClass unitClass;
     
+    [Header("Projectiles")]
+    public GameObject projectilePrefab; // Сюди перетягніть префаб вогняної кулі/льоду
+    public int attackRange = 3;         // Дальність стрільби
+    public int attackDamage = 20;
+    
     [Header("Base Stats")]
     public int baseHealth;
     public int baseDamage;

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: d5916469b95b8af458bd47c0cfc894a7
+guid: 81166a0de807bf04ba96629f6f1189ac
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2624596502034751511
-    second: Fire_Mage_0
+      213: -5072803559558880046
+    second: Stone_Mage_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,23 +126,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Fire_Mage_0
+      name: Stone_Mage_0
       rect:
         serializedVersion: 2
         x: 2
         y: 0
-        width: 29
-        height: 30
+        width: 24
+        height: 32
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9ef5c79136f839bd0800000000000000
-      internalID: -2624596502034751511
+      spriteID: 2d4e7291a08c999b0800000000000000
+      internalID: -5072803559558880046
       vertices: []
       indices: 
       edges: []
@@ -152,7 +152,7 @@ TextureImporter:
     physicsShape: []
     bones: []
     spriteID: 5e97eb03825dee720800000000000000
-    internalID: 1537655665
+    internalID: 0
     vertices: []
     indices: 
     edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Fire_Mage_0: -2624596502034751511
+      Stone_Mage_0: -5072803559558880046
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

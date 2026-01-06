@@ -33,12 +33,16 @@ public static class CombatCalculator
 
     public static void ApplyDamage(Unit attacker, Unit target, int damage)
     {
+        if (target == null) return;
+
         target.curentHealth -= damage;
+
+        // Безпечний лог: якщо attacker є — пишемо ім'я, якщо немає — пишемо "Снаряд"
+        string attackerName = (attacker != null) ? attacker.LogName : "Снаряд";
+        Debug.Log($"{attackerName} наніс {target.LogName} [{damage}] одиниць урону");
     
-        // ЛОГ АТАКИ
-        Debug.Log($"{attacker.LogName} наніс {target.LogName} [{damage}] одиниць урону");
         Debug.Log($"Здоров'я {target.unitName} [{target.curentHealth}]");
-    
+
         if (target.IsDead())
         {
             target.isAlive = false;

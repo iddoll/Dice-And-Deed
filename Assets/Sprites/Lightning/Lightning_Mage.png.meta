@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 318e04bb987947d409806635217cfc91
+guid: 16316c616cc9b2344846cdb2d52a2c90
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2287359971891602460
-    second: Ice_Archer_0
+      213: -542763851915355741
+    second: Lightning_Mage_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,8 +49,8 @@ TextureImporter:
   spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
-  alignment: 0
-  spritePivot: {x: 0.5, y: 0.5}
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0}
   spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Ice_Archer_0
+      name: Lightning_Mage_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 6
         y: 0
-        width: 32
-        height: 29
+        width: 26
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c14eb0686c55ebf10800000000000000
-      internalID: 2287359971891602460
+      spriteID: 3a999a10727b778f0800000000000000
+      internalID: -542763851915355741
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Ice_Archer_0: 2287359971891602460
+      Lightning_Mage_0: -542763851915355741
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

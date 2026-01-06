@@ -196,14 +196,34 @@ public class GridManager : MonoBehaviour
     {
         GameObject go = new GameObject(data.unitName + (isPlayer ? "_Player" : "_Enemy"));
         SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = data.unitSprite != null ? data.unitSprite : playerTilePrefab.GetComponent<SpriteRenderer>().sprite;
-        sr.color = isPlayer ? Color.white : new Color(1, 0.7f, 0.7f); // Вороги трохи червоніші
-        sr.sortingOrder = 2;
+        sr.sprite = data.unitSprite;
+        sr.color = isPlayer ? Color.white : new Color(1, 0.8f, 0.8f);
+        sr.sortingOrder = 5; 
+
+        // Встановлюємо масштаб (залиште свій поточний, наприклад 1.5 або 2)
+        go.transform.localScale = new Vector3(2f, 2f, 1f);
+
+        if (!isPlayer) sr.flipX = true; 
 
         Unit unit = go.AddComponent<Unit>();
-        unit.unitID = _globalUnitCount++; // Призначаємо номер і збільшуємо лічильник
+        unit.unitID = _globalUnitCount++;
         unit.Setup(data, isPlayer);
-        PlaceUnit(unit, x, y);
+
+        // ОТРИМАННЯ ЦЕНТРАЛЬНОЇ ПОЗИЦІЇ ТАЙЛА
+        Vector3 tileCenterPos = GetWorldPosition(x, y);
+
+        // Якщо ви налаштували Pivot на Bottom, то y + 0 (центр тайла) 
+        // поставить "ноги" мага рівно в центр.
+        // Якщо ж Pivot залишився Center, додайте невеликий offset (наприклад, +0.3f), 
+        // щоб маг не "тонув" у тайлі.
+        float yOffset = 0f; // Налаштуйте це значення, щоб маг візуально стояв на площині
+    
+        unit.xPosition = x;
+        unit.yPosition = y;
+        _unitsOnGrid[x, y] = unit;
+    
+        // Встановлюємо фінальну позицію
+        unit.transform.position = new Vector3(tileCenterPos.x, tileCenterPos.y + yOffset, -0.1f);
     }
 
     // --- Grid Logic ---
@@ -287,34 +307,77 @@ public class GridManager : MonoBehaviour
     }
 
     private void HighlightMoveRange(int startX, int startY)
+{
+    if (_selectedUnit == null) return;
+
+    int range = _selectedUnit.unitData.attackRange; // Має бути 2
+
+    for (int dx = -range; dx <= range; dx++)
     {
-        for (int dx = -1; dx <= 1; dx++)
+        for (int dy = -range; dy <= range; dy++)
         {
-            for (int dy = -1; dy <= 1; dy++)
+            if (dx == 0 && dy == 0) continue;
+
+            int targetX = startX + dx;
+            int targetY = startY + dy;
+
+            if (IsValidPosition(targetX, targetY))
             {
-                if (dx == 0 && dy == 0) continue;
-                int targetX = startX + dx;
-                int targetY = startY + dy;
+                Tile tile = _tilesOnGrid[targetX, targetY];
+                Unit targetUnit = GetUnitAtPosition(targetX, targetY);
+                int dist = Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy));
 
-                if (IsValidPosition(targetX, targetY))
+                if (dist == 1) // Радіус 1 (сусідні)
                 {
-                    Tile tile = _tilesOnGrid[targetX, targetY];
-                    Unit targetUnit = GetUnitAtPosition(targetX, targetY);
-
                     if (targetUnit == null)
-                    {
-                        tile.SetHighlightColor(moveRangeColor);
-                        _highlightedTiles.Add(tile);
-                    }
-                    else if (targetUnit.isPlayerUnit != _selectedUnit.isPlayerUnit)
-                    {
-                        tile.SetHighlightColor(attackRangeColor);
-                        _highlightedTiles.Add(tile);
-                    }
+                        tile.SetHighlightColor(Color.green); // Можна йти
+                    else if (!targetUnit.isPlayerUnit)
+                        tile.SetHighlightColor(Color.red);   // Можна бити впритул
                 }
+                else // Радіус 2 (через одну)
+                {
+                    if (targetUnit == null)
+                        tile.SetHighlightColor(Color.blue);  // Тільки стріляти (порожньо)
+                    else if (!targetUnit.isPlayerUnit)
+                        tile.SetHighlightColor(Color.red);   // Тільки стріляти (ворог)
+                }
+                
+                _highlightedTiles.Add(tile);
             }
         }
     }
+}
+
+public bool ExecuteAttack(Unit attacker, int targetX, int targetY)
+{
+    Unit target = GetUnitAtPosition(targetX, targetY);
+    if (target == null) return false;
+
+    // Перевірка наявності префаба снаряда
+    if (attacker.unitData != null && attacker.unitData.projectilePrefab != null)
+    {
+        GameObject projGO = Instantiate(attacker.unitData.projectilePrefab, attacker.transform.position, Quaternion.identity);
+        Projectile proj = projGO.GetComponent<Projectile>();
+        
+        int damage = CombatCalculator.CalculateDamage(attacker, target);
+        proj.Setup(attacker, target, damage); // Передаємо атакувальника!
+        
+        Debug.Log($"{attacker.unitName} атакує дистанційно ціль {target.unitName}");
+    }
+    else
+    {
+        // Ближній бій (якщо немає префаба)
+        int damage = CombatCalculator.CalculateDamage(attacker, target);
+        CombatCalculator.ApplyDamage(attacker, target, damage);
+        
+        if (target.IsDead())
+        {
+            ClearUnitFromGrid(target.xPosition, target.yPosition);
+            Destroy(target.gameObject);
+        }
+    }
+    return true;
+}
     
    // Додай цей метод у GridManager
    public void SwapOrMoveUnits(Tile source, Tile target)
@@ -374,20 +437,12 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    public bool ExecuteAttack(Unit attacker, int targetX, int targetY)
+    public void ClearUnitFromGrid(int x, int y)
     {
-        Unit target = GetUnitAtPosition(targetX, targetY);
-        if (target == null) return false;
-
-        int damage = CombatCalculator.CalculateDamage(attacker, target);
-        CombatCalculator.ApplyDamage(attacker, target, damage);
-        
-        if (target.IsDead())
+        if (x >= 0 && x < _totalColumns && y >= 0 && y < rows)
         {
-            _unitsOnGrid[target.xPosition, target.yPosition] = null;
-            Destroy(target.gameObject);
-        }   
-        return true;
+            _unitsOnGrid[x, y] = null;
+        }
     }
     
     // --- Додай ці методи та зміни в GridManager ---

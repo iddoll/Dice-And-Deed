@@ -34,7 +34,12 @@ public class Tile : MonoBehaviour
     public void SetHighlightColor(Color color)
     {
         _isHighlightedForMove = true;
-        if (_renderer != null) _renderer.color = color;
+        if (_renderer != null) 
+        {
+            // Додаємо прозорість (0.5f), щоб бачити плитку під кольором
+            color.a = 0.5f; 
+            _renderer.color = color;
+        }
     }
 
     public void ResetColor()
@@ -108,25 +113,36 @@ public class Tile : MonoBehaviour
     private void OnMouseExit() { if (!_isHighlightedForMove) ResetColor(); }
     private void HandleLeftClick()
     {
-        // Якщо фаза БОЮ
         if (GridManager.Instance.currentPhase == GamePhase.Battle)
         {
-            // Дозволяємо виділяти юніта ТІЛЬКИ якщо зараз хід гравця
             if (!TurnManager.Instance.isPlayerTurn) return;
-    
+
             Unit unitOnTile = GridManager.Instance.GetUnitAtPosition(x, y);
             Unit selected = GridManager.Instance.SelectedUnit;
-    
+
+            // 1. Вибір свого юніта
             if (unitOnTile != null && unitOnTile.isPlayerUnit && unitOnTile.hasAction)
             {
                 GridManager.Instance.SelectUnit(unitOnTile);
             }
-            else if (selected != null && GridManager.Instance.IsTileHighlightedForMove(x, y))
+            // 2. Дія підсвіченою клітинкою
+            else if (selected != null && _isHighlightedForMove)
             {
                 if (unitOnTile != null && !unitOnTile.isPlayerUnit)
+                {
+                    // Якщо на клітинці ворог — ЗАВЖДИ атакуємо (і в радіусі 1, і в радіусі 2)
                     GridManager.Instance.AttackWithSelectedUnit(x, y);
-                else
-                    GridManager.Instance.MoveSelectedUnitTo(x, y);
+                }
+                else if (unitOnTile == null)
+                {
+                    // Якщо клітинка порожня
+                    int dist = Mathf.Max(Mathf.Abs(x - selected.xPosition), Mathf.Abs(y - selected.yPosition));
+                
+                    if (dist == 1) 
+                        GridManager.Instance.MoveSelectedUnitTo(x, y); // Йдемо (тільки на 1 клітинку)
+                    else 
+                        Debug.Log("Сюди не можна йти, тільки стріляти, але ворога немає.");
+                }
             }
         }
     }
