@@ -7,6 +7,9 @@ public class GridManager : MonoBehaviour
 {
     public static GridManager Instance;
     
+    [Header("Base Prefab")]
+    public GameObject baseUnitPrefab;
+    
     [Header("Game State")]
     public GamePhase currentPhase = GamePhase.Placement;
     private int _unitsPlaced = 0;
@@ -194,36 +197,23 @@ public class GridManager : MonoBehaviour
 
     public void SpawnUnit(UnitData data, int x, int y, bool isPlayer)
     {
-        GameObject go = new GameObject(data.unitName + (isPlayer ? "_Player" : "_Enemy"));
-        SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = data.unitSprite;
-        sr.color = isPlayer ? Color.white : new Color(1, 0.8f, 0.8f);
-        sr.sortingOrder = 5; 
+        GameObject go = Instantiate(baseUnitPrefab);
+        go.name = data.unitName + (isPlayer ? "_Player" : "_Enemy");
+        go.transform.localScale = new Vector3(2f, 2f, 1f); 
 
-        // Встановлюємо масштаб (залиште свій поточний, наприклад 1.5 або 2)
-        go.transform.localScale = new Vector3(2f, 2f, 1f);
-
-        if (!isPlayer) sr.flipX = true; 
-
-        Unit unit = go.AddComponent<Unit>();
+        Unit unit = go.GetComponent<Unit>();
         unit.unitID = _globalUnitCount++;
         unit.Setup(data, isPlayer);
 
-        // ОТРИМАННЯ ЦЕНТРАЛЬНОЇ ПОЗИЦІЇ ТАЙЛА
         Vector3 tileCenterPos = GetWorldPosition(x, y);
-
-        // Якщо ви налаштували Pivot на Bottom, то y + 0 (центр тайла) 
-        // поставить "ноги" мага рівно в центр.
-        // Якщо ж Pivot залишився Center, додайте невеликий offset (наприклад, +0.3f), 
-        // щоб маг не "тонув" у тайлі.
-        float yOffset = 0f; // Налаштуйте це значення, щоб маг візуально стояв на площині
-    
         unit.xPosition = x;
         unit.yPosition = y;
         _unitsOnGrid[x, y] = unit;
-    
-        // Встановлюємо фінальну позицію
-        unit.transform.position = new Vector3(tileCenterPos.x, tileCenterPos.y + yOffset, -0.1f);
+
+        // --- ВИПРАВЛЕННЯ ТУТ ---
+        // Додаємо невеликий мінус по Y (наприклад, -0.4f), щоб опустити мага на тайл
+        float verticalOffset = -0.4f; 
+        unit.transform.position = new Vector3(tileCenterPos.x, tileCenterPos.y + verticalOffset, -0.1f);
     }
 
     // --- Grid Logic ---

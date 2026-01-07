@@ -37,48 +37,54 @@ public class Unit : MonoBehaviour
     public GameObject healthBarPrefab;
     private HealthBar _hpBar;
     
+    [Header("VFX")]
+    public GameObject damageTextPrefab; // Призначте префаб DamageTextCanvas в інспекторі
+    
     public string LogName => $"[{unitID}]{unitName}";
     public void Setup(UnitData data, bool isPlayer)
     {
-        // 1. Ініціалізація даних
         unitData = data;
         unitName = data.unitName;
         element = data.element;
         unitClass = data.unitClass;
         description = data.description;
-    
+
         maxHealth = data.baseHealth;
         curentHealth = data.baseHealth;
         attackDamage = data.baseDamage;
         classBonus = data.classBonus;
-    
+
         isPlayerUnit = isPlayer;
 
-        // 2. Спавн HealthBar (ТІЛЬКИ ОДИН РАЗ через unitData)
-        if (unitData != null && unitData.healthBarPrefab != null)
-        {
-            GameObject hbGO = Instantiate(unitData.healthBarPrefab, transform);
-    
-            // Позиціонування: Y = 0.85f зазвичай добре підходить для мага
-            hbGO.transform.localPosition = new Vector3(0, 1f, 0);
-    
-            _hpBar = hbGO.GetComponent<HealthBar>();
-    
-            if (_hpBar != null)
-            {
-                _hpBar.Setup(this);
-            }
-        }
-    
-        // 3. Візуалізація спрайта
+        // Автоматично розвертаємо ворогів обличчям до гравця
         if (_sr == null) _sr = GetComponent<SpriteRenderer>();
+        _sr.flipX = !isPlayer; 
+    
         if (data.unitSprite != null) _sr.sprite = data.unitSprite;
 
-        // 4. Додаткові системи
+        // Створюємо HP Bar
+        if (data.healthBarPrefab != null)
+        {
+            GameObject hbGO = Instantiate(data.healthBarPrefab, transform);
+            hbGO.transform.localPosition = new Vector3(0, 1.1f, 0); // Трохи вище
+            _hpBar = hbGO.GetComponent<HealthBar>();
+            if (_hpBar != null) _hpBar.Setup(this);
+        }
+
         InitBaseColor();
-        ExecuteAbilities(AbilityTrigger.OnSpawn);
+        // ExecuteAbilities(AbilityTrigger.OnSpawn); // Розкоментуй, якщо готово
     }
 
+    private void LateUpdate()
+    {
+        if (_sr != null)
+        {
+            // Множимо Y на -100. 
+            // Чим нижче маг (менше Y), тим більше число Order in Layer він отримає.
+            // Наприклад: Y = -1 => Order = 100. Y = -2 => Order = 200.
+            _sr.sortingOrder = Mathf.RoundToInt(transform.position.y * -100f);
+        }
+    }
     public void ExecuteAbilities(AbilityTrigger triggerType, Unit target = null)
     {
         foreach (var ability in activeAbilities)
@@ -118,8 +124,30 @@ public class Unit : MonoBehaviour
     {
         curentHealth -= damage;
         if (curentHealth < 0) curentHealth = 0;
-        
+
         if (_hpBar != null) _hpBar.UpdateHealthBar();
+
+        // СПАВН ЦИФР ШКОДИ З UNIT DATA
+        if (unitData != null && unitData.damageTextPrefab != null)
+        {
+            // Додаємо випадковий зсув по горизонталі (від -0.3 до 0.3)
+            float randomX = Random.Range(-0.3f, 0.3f);
+            Vector3 spawnPos = transform.position + new Vector3(randomX, 1.6f, 0);
+        
+            GameObject dtGO = Instantiate(unitData.damageTextPrefab, spawnPos, Quaternion.identity);
+        
+            DamageText dtScript = dtGO.GetComponent<DamageText>();
+            if (dtScript != null) 
+            {
+                dtScript.Setup(damage);
+            }
+        }
+
+        if (IsDead())
+        {
+            isAlive = false;
+            // Тут можна додати ефект смерті
+        }
     }
     
     public bool IsDead() => curentHealth <= 0;
