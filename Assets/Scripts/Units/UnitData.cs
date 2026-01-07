@@ -17,7 +17,8 @@ public class UnitData : ScriptableObject
     public int baseHealth;
     public int baseDamage;
     public int classBonus; // Наприклад, +2 до урону воїнам свого класу
-
+    public GameObject healthBarPrefab;
+    
     [TextArea]
     public string description;
 

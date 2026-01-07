@@ -35,18 +35,10 @@ public static class CombatCalculator
     {
         if (target == null) return;
 
-        target.curentHealth -= damage;
+        // Передаємо відповідальність за отримання шкоди самому юніту
+        target.TakeDamage(damage);
 
-        // Безпечний лог: якщо attacker є — пишемо ім'я, якщо немає — пишемо "Снаряд"
         string attackerName = (attacker != null) ? attacker.LogName : "Снаряд";
-        Debug.Log($"{attackerName} наніс {target.LogName} [{damage}] одиниць урону");
-    
-        Debug.Log($"Здоров'я {target.unitName} [{target.curentHealth}]");
-
-        if (target.IsDead())
-        {
-            target.isAlive = false;
-            Debug.Log($"<color=red>{target.LogName} був знищений!</color>");
-        }
+        Debug.Log($"{attackerName} наніс {target.LogName} [{damage}] шкоди. Залишилось: {target.curentHealth}");
     }
 }

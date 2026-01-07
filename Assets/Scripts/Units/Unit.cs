@@ -33,27 +33,49 @@ public class Unit : MonoBehaviour
     private SpriteRenderer _sr;
     private Color _baseColor;
 
+    [Header("UI")]
+    public GameObject healthBarPrefab;
+    private HealthBar _hpBar;
+    
     public string LogName => $"[{unitID}]{unitName}";
     public void Setup(UnitData data, bool isPlayer)
     {
+        // 1. Ініціалізація даних
         unitData = data;
         unitName = data.unitName;
         element = data.element;
         unitClass = data.unitClass;
         description = data.description;
-        
+    
         maxHealth = data.baseHealth;
         curentHealth = data.baseHealth;
         attackDamage = data.baseDamage;
         classBonus = data.classBonus;
-        
+    
         isPlayerUnit = isPlayer;
 
+        // 2. Спавн HealthBar (ТІЛЬКИ ОДИН РАЗ через unitData)
+        if (unitData != null && unitData.healthBarPrefab != null)
+        {
+            GameObject hbGO = Instantiate(unitData.healthBarPrefab, transform);
+    
+            // Позиціонування: Y = 0.85f зазвичай добре підходить для мага
+            hbGO.transform.localPosition = new Vector3(0, 1f, 0);
+    
+            _hpBar = hbGO.GetComponent<HealthBar>();
+    
+            if (_hpBar != null)
+            {
+                _hpBar.Setup(this);
+            }
+        }
+    
+        // 3. Візуалізація спрайта
         if (_sr == null) _sr = GetComponent<SpriteRenderer>();
         if (data.unitSprite != null) _sr.sprite = data.unitSprite;
 
+        // 4. Додаткові системи
         InitBaseColor();
-        
         ExecuteAbilities(AbilityTrigger.OnSpawn);
     }
 
@@ -90,6 +112,14 @@ public class Unit : MonoBehaviour
         curentHealth += amount;
         if (curentHealth > maxHealth) curentHealth = maxHealth;
         Debug.Log($"{unitName} відновив здоров'я. Поточне HP: {curentHealth}");
+    }
+    
+    public void TakeDamage(int damage)
+    {
+        curentHealth -= damage;
+        if (curentHealth < 0) curentHealth = 0;
+        
+        if (_hpBar != null) _hpBar.UpdateHealthBar();
     }
     
     public bool IsDead() => curentHealth <= 0;
