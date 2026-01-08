@@ -235,14 +235,20 @@ public class GridManager : MonoBehaviour
     {
         if (IsValidPosition(newX, newY) && _unitsOnGrid[newX, newY] == null)
         {
+            // 1. ЛОГІЧНЕ ПЕРЕМІЩЕННЯ (миттєво)
             _unitsOnGrid[oldX, oldY] = null;
-            bool success = PlaceUnit(unitToMove, newX, newY);
-            if (success)
-            {
-                // ЛОГ ПЕРЕМІЩЕННЯ
-                Debug.Log($"{unitToMove.LogName} перейшов на клітину [{newX} {newY}]");
-            }
-            return success;
+            _unitsOnGrid[newX, newY] = unitToMove;
+            unitToMove.xPosition = newX;
+            unitToMove.yPosition = newY;
+
+            // 2. ВІЗУАЛЬНЕ ПЕРЕМІЩЕННЯ (плавно)
+            Vector3 targetWorldPos = GetWorldPosition(newX, newY) + new Vector3(0, -0.4f, -1f);
+        
+            // Запускаємо корутину через юніта
+            unitToMove.StartCoroutine(unitToMove.MoveToRoutine(targetWorldPos));
+
+            Debug.Log($"{unitToMove.LogName} перейшов на [{newX} {newY}]");
+            return true;
         }
         return false;
     }

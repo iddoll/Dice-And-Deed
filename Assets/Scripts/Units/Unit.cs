@@ -40,6 +40,10 @@ public class Unit : MonoBehaviour
     [Header("VFX")]
     public GameObject damageTextPrefab; // Призначте префаб DamageTextCanvas в інспекторі
     
+    [Header("Movement Settings")]
+    public float moveSpeed = 5f;
+    private bool _isMoving = false;
+    
     public string LogName => $"[{unitID}]{unitName}";
     public void Setup(UnitData data, bool isPlayer)
     {
@@ -96,6 +100,26 @@ public class Unit : MonoBehaviour
         }
     }
     
+    // Метод для плавного переміщення
+    public System.Collections.IEnumerator MoveToRoutine(Vector3 targetPos)
+    {
+        _isMoving = true;
+    
+        // Поки дистанція до цілі більша за похибку
+        while (Vector3.Distance(transform.position, targetPos) > 0.01f)
+        {
+            transform.position = Vector3.MoveTowards(
+                transform.position, 
+                targetPos, 
+                moveSpeed * Time.deltaTime
+            );
+            yield return null; // Чекаємо наступного кадру
+        }
+
+        transform.position = targetPos; // Фіксуємо в кінцевій точці
+        _isMoving = false;
+    }
+    
     public void InitBaseColor()
     {
         if (_sr == null) _sr = GetComponent<SpriteRenderer>();
@@ -143,10 +167,11 @@ public class Unit : MonoBehaviour
             }
         }
 
-        if (IsDead())
+        if (IsDead() && isAlive)
         {
             isAlive = false;
-            // Тут можна додати ефект смерті
+            GridManager.Instance.ClearUnitFromGrid(xPosition, yPosition); // Звільняємо сітку
+            Destroy(gameObject, 0.2f); // Невелике затримання для анімації цифр шкоди
         }
     }
     
