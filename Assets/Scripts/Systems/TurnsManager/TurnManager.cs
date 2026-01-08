@@ -99,33 +99,59 @@ public class TurnManager : MonoBehaviour
     }
 
     private void ExecuteEnemyLogic(Unit enemy)
+{
+    Unit player = FindNearestPlayer(enemy);
+    if (player == null) { enemy.SetState(false); return; }
+
+    // 1. ПЕРЕВІРКА АТАКИ: чи дістаємо ми ціль з поточної позиції?
+    // Використовуємо Mathf.Max для "квадратної" дистанції (діагоналі рахуються як 1 крок)
+    int distX = Mathf.Abs(enemy.xPosition - player.xPosition);
+    int distY = Mathf.Abs(enemy.yPosition - player.yPosition);
+    int currentDist = Mathf.Max(distX, distY);
+
+    if (currentDist <= enemy.unitData.attackRange)
     {
-        Unit player = FindNearestPlayer(enemy);
-        if (player == null) { enemy.SetState(false); return; }
-
-        // 1. Перевіряємо, чи можемо ми вдарити (радіус 1 клітинка)
-        int distX = Mathf.Abs(enemy.xPosition - player.xPosition);
-        int distY = Mathf.Abs(enemy.yPosition - player.yPosition);
-
-        if (distX <= 1 && distY <= 1)
-        {
-            GridManager.Instance.ExecuteAttack(enemy, player.xPosition, player.yPosition);
-            enemy.SetState(false);
-            return;
-        }
-
-        // 2. Якщо гравець далеко — робимо крок у його бік
-        int moveX = enemy.xPosition + (int)Mathf.Sign(player.xPosition - enemy.xPosition);
-        int moveY = enemy.yPosition + (int)Mathf.Sign(player.yPosition - enemy.yPosition);
-
-        // Перевіряємо, чи вільна клітинка перед тим як йти
-        if (GridManager.Instance.GetUnitAtPosition(moveX, moveY) == null)
-        {
-            GridManager.Instance.MoveUnit(enemy, enemy.xPosition, enemy.yPosition, moveX, moveY);
-        }
-
-        enemy.SetState(false); // Завершуємо дію після ходу або невдалої спроби ходу
+        GridManager.Instance.ExecuteAttack(enemy, player.xPosition, player.yPosition);
+        enemy.SetState(false); // Зробив дію — хід закінчено
+        return;
     }
+
+    // 2. ЯКЩО НЕ ДІСТАЄМО — РОБИМО КРОК (вибираємо найкращу сусідню вільну клітину)
+    Vector2Int bestTile = new Vector2Int(enemy.xPosition, enemy.yPosition);
+    float minDistance = float.MaxValue;
+
+    // Перевіряємо всі 8 клітин навколо ворога
+    for (int dx = -1; dx <= 1; dx++)
+    {
+        for (int dy = -1; dy <= 1; dy++)
+        {
+            if (dx == 0 && dy == 0) continue;
+
+            int checkX = enemy.xPosition + dx;
+            int checkY = enemy.yPosition + dy;
+
+            // Чи клітина на полі та чи вона вільна?
+            if (GridManager.Instance.GetUnitAtPosition(checkX, checkY) == null)
+            {
+                // Рахуємо відстань від цієї клітини до гравця
+                float d = Vector2.Distance(new Vector2(checkX, checkY), new Vector2(player.xPosition, player.yPosition));
+                if (d < minDistance)
+                {
+                    minDistance = d;
+                    bestTile = new Vector2Int(checkX, checkY);
+                }
+            }
+        }
+    }
+
+    // Якщо знайшли кращу вільну клітину — йдемо туди
+    if (bestTile.x != enemy.xPosition || bestTile.y != enemy.yPosition)
+    {
+        GridManager.Instance.MoveUnit(enemy, enemy.xPosition, enemy.yPosition, bestTile.x, bestTile.y);
+    }
+
+    enemy.SetState(false); // Після кроку хід теж закінчується (правило "або-або")
+}
 
     private Unit FindNearestPlayer(Unit enemy)
     {

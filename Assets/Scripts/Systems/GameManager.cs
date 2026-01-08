@@ -31,9 +31,14 @@ public class GameManager : MonoBehaviour
     }
     public void InitializeGame()
     {
-        unitList = new List<Unit>();
+        // unitList = new List<Unit>(); // Видали цей рядок, GetAllUnits вже повертає список
         unitList = gridManager.GetAllUnits();
-        StartTurn();
+    
+        if (unitList.Count > 0)
+        {
+            currentUnitIndex = 0;
+            StartTurn();
+        }
     }
 
     public void StartTurn()
@@ -71,22 +76,29 @@ public class GameManager : MonoBehaviour
 
     public void NextTurn()
     {
-        if (unitList.Count == 1) // Якщо гра завершена, просто виходимо
+        // Оновлюємо список, бо хтось міг померти під час ходу
+        unitList = gridManager.GetAllUnits();
+
+        if (unitList.Count <= 1)
         {
-            Debug.Log("Гра завершена достроково (WinCondition мав спрацювати раніше).");
+            CheckWinCondition();
             return; 
         }
+
         currentUnitIndex++;
-        currentUnitIndex = currentUnitIndex % unitList.Count;
-        if (currentUnitIndex == 0)
+        if (currentUnitIndex >= unitList.Count)
         {
-            StartTurn();
+            currentUnitIndex = 0;
+            // Можна додати логіку початку нового раунду тут
         }
-        else
-        {
-            currentPhase = CombatPhase.MainPhase;
-            Debug.Log($"Розпочато хід: {unitList[currentUnitIndex].name}");
-        }
+
+        Unit currentUnit = unitList[currentUnitIndex];
+        currentPhase = CombatPhase.MainPhase;
+    
+        // Активуємо юніта (скидаємо його колір/стан)
+        currentUnit.SetState(true); 
+    
+        Debug.Log($"Хід юніта: {currentUnit.LogName} (Гравець: {currentUnit.isPlayerUnit})");
     }
 
     public void UpdateUnitList()

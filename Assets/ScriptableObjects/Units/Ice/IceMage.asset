@@ -18,6 +18,8 @@ MonoBehaviour:
   projectilePrefab: {fileID: 3316250743927074159, guid: 5787dc4a9d4eab84285e225f9c13d197, type: 3}
   attackRange: 2
   attackDamage: 20
+  damageTextPrefab: {fileID: 5211444131572150603, guid: f869f062f30d4d5409fa531161deff08, type: 3}
+  healthBarPrefab: {fileID: 6431266059244712828, guid: c627f26e550b6b2408cd8f06cb884eee, type: 3}
   baseHealth: 50
   baseDamage: 100
   classBonus: 2

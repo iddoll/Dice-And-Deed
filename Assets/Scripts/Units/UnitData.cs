@@ -12,12 +12,14 @@ public class UnitData : ScriptableObject
     public GameObject projectilePrefab; // Сюди перетягніть префаб вогняної кулі/льоду
     public int attackRange = 3;         // Дальність стрільби
     public int attackDamage = 20;
+    public GameObject damageTextPrefab;
+    public GameObject healthBarPrefab;
     
     [Header("Base Stats")]
     public int baseHealth;
     public int baseDamage;
     public int classBonus; // Наприклад, +2 до урону воїнам свого класу
-
+    
     [TextArea]
     public string description;
 

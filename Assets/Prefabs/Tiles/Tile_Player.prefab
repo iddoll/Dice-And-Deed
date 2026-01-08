@@ -80,7 +80,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 0.41037738, g: 1, b: 0.94357044, a: 1}
   m_FlipX: 0
@@ -150,6 +150,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfde2be4931c46f4b972ac97ae26b957, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tile
-  highlightColor: {r: 0, g: 0.30280232, b: 1, a: 1}
+  hoverColor: {r: 0, g: 1, b: 1, a: 1}
   x: 0
   y: 0

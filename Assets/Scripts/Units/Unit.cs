@@ -33,6 +33,17 @@ public class Unit : MonoBehaviour
     private SpriteRenderer _sr;
     private Color _baseColor;
 
+    [Header("UI")]
+    public GameObject healthBarPrefab;
+    private HealthBar _hpBar;
+    
+    [Header("VFX")]
+    public GameObject damageTextPrefab; // Призначте префаб DamageTextCanvas в інспекторі
+    
+    [Header("Movement Settings")]
+    public float moveSpeed = 5f;
+    private bool _isMoving = false;
+    
     public string LogName => $"[{unitID}]{unitName}";
     public void Setup(UnitData data, bool isPlayer)
     {
@@ -41,22 +52,43 @@ public class Unit : MonoBehaviour
         element = data.element;
         unitClass = data.unitClass;
         description = data.description;
-        
+
         maxHealth = data.baseHealth;
         curentHealth = data.baseHealth;
         attackDamage = data.baseDamage;
         classBonus = data.classBonus;
-        
+
         isPlayerUnit = isPlayer;
 
+        // Автоматично розвертаємо ворогів обличчям до гравця
         if (_sr == null) _sr = GetComponent<SpriteRenderer>();
+        _sr.flipX = !isPlayer; 
+    
         if (data.unitSprite != null) _sr.sprite = data.unitSprite;
 
+        // Створюємо HP Bar
+        if (data.healthBarPrefab != null)
+        {
+            GameObject hbGO = Instantiate(data.healthBarPrefab, transform);
+            hbGO.transform.localPosition = new Vector3(0, 1.1f, 0); // Трохи вище
+            _hpBar = hbGO.GetComponent<HealthBar>();
+            if (_hpBar != null) _hpBar.Setup(this);
+        }
+
         InitBaseColor();
-        
-        ExecuteAbilities(AbilityTrigger.OnSpawn);
+        // ExecuteAbilities(AbilityTrigger.OnSpawn); // Розкоментуй, якщо готово
     }
 
+    private void LateUpdate()
+    {
+        if (_sr != null)
+        {
+            // Множимо Y на -100. 
+            // Чим нижче маг (менше Y), тим більше число Order in Layer він отримає.
+            // Наприклад: Y = -1 => Order = 100. Y = -2 => Order = 200.
+            _sr.sortingOrder = Mathf.RoundToInt(transform.position.y * -100f);
+        }
+    }
     public void ExecuteAbilities(AbilityTrigger triggerType, Unit target = null)
     {
         foreach (var ability in activeAbilities)
@@ -66,6 +98,26 @@ public class Unit : MonoBehaviour
                 ability.Execute(this, target);
             }
         }
+    }
+    
+    // Метод для плавного переміщення
+    public System.Collections.IEnumerator MoveToRoutine(Vector3 targetPos)
+    {
+        _isMoving = true;
+    
+        // Поки дистанція до цілі більша за похибку
+        while (Vector3.Distance(transform.position, targetPos) > 0.01f)
+        {
+            transform.position = Vector3.MoveTowards(
+                transform.position, 
+                targetPos, 
+                moveSpeed * Time.deltaTime
+            );
+            yield return null; // Чекаємо наступного кадру
+        }
+
+        transform.position = targetPos; // Фіксуємо в кінцевій точці
+        _isMoving = false;
     }
     
     public void InitBaseColor()
@@ -90,6 +142,37 @@ public class Unit : MonoBehaviour
         curentHealth += amount;
         if (curentHealth > maxHealth) curentHealth = maxHealth;
         Debug.Log($"{unitName} відновив здоров'я. Поточне HP: {curentHealth}");
+    }
+    
+    public void TakeDamage(int damage)
+    {
+        curentHealth -= damage;
+        if (curentHealth < 0) curentHealth = 0;
+
+        if (_hpBar != null) _hpBar.UpdateHealthBar();
+
+        // СПАВН ЦИФР ШКОДИ З UNIT DATA
+        if (unitData != null && unitData.damageTextPrefab != null)
+        {
+            // Додаємо випадковий зсув по горизонталі (від -0.3 до 0.3)
+            float randomX = Random.Range(-0.3f, 0.3f);
+            Vector3 spawnPos = transform.position + new Vector3(randomX, 1.6f, 0);
+        
+            GameObject dtGO = Instantiate(unitData.damageTextPrefab, spawnPos, Quaternion.identity);
+        
+            DamageText dtScript = dtGO.GetComponent<DamageText>();
+            if (dtScript != null) 
+            {
+                dtScript.Setup(damage);
+            }
+        }
+
+        if (IsDead() && isAlive)
+        {
+            isAlive = false;
+            GridManager.Instance.ClearUnitFromGrid(xPosition, yPosition); // Звільняємо сітку
+            Destroy(gameObject, 0.2f); // Невелике затримання для анімації цифр шкоди
+        }
     }
     
     public bool IsDead() => curentHealth <= 0;
