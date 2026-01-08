@@ -60,6 +60,9 @@ public class GridManager : MonoBehaviour
     
     public TMPro.TextMeshProUGUI timerText; // Признач об'єкт "118" сюди
     
+    [Header("Placement Data")]
+    private UnitData _unitToSpawn; // Кого ми зараз тримаємо "в руках" для спавну
+    
     void Awake()
     {
         Instance = this;
@@ -86,6 +89,12 @@ public class GridManager : MonoBehaviour
     
             if (placementTime <= 0) StartBattlePhase();
         }
+    }
+    
+    public void SetUnitToSpawn(UnitData data) 
+    {
+        _unitToSpawn = data;
+        Debug.Log($"Вибрано для розстановки: {data.unitName}");
     }
     
     // Додай цей метод, щоб TurnManager міг скидати таймер
@@ -454,49 +463,47 @@ public bool ExecuteAttack(Unit attacker, int targetX, int targetY)
 // 3. Логіка вільної перестановки під час Placement
     private Unit _unitToSwap;
 
-    public void HandlePlacementClick(int x, int y)
+    // Оновлений метод з підтримкою ПКМ
+    public void HandlePlacementClick(int x, int y, int mouseButton)
     {
-        // ПЕРЕВІРКА: чи клікаємо ми взагалі у свою зону?
-        // Якщо ні - ігноруємо клік повністю
-        if (!IsInPlacementZone(x, true)) 
-        {
-            Debug.LogWarning("Ви можете розставляти війська лише у своїй зоні (сині клітинки)!");
-            return; 
-        }
-    
+        if (!IsInPlacementZone(x, true)) return;
+
         Unit unitOnTile = GetUnitAtPosition(x, y);
-    
-        // 1. Перестановка існуючого юніта
-        if (_unitToSwap != null && unitOnTile == null)
+
+        // --- ЛКМ (0): Розстановка та перетягування ---
+        if (mouseButton == 0)
         {
-            // Оскільки ми вже перевірили IsInPlacementZone вище, 
-            // юніт переміститься лише всередині дозволеної зони
-            MoveUnit(_unitToSwap, _unitToSwap.xPosition, _unitToSwap.yPosition, x, y);
-            _unitToSwap = null;
-        }
-        // 2. Спавн нового юніта
-        else if (unitOnTile == null)
-        {
-            // Додаємо перевірку кількості виставлених юнітів
-                if (GetAllUnits().Count < 5) 
+            if (unitOnTile == null)
+            {
+                if (_unitToSwap != null) // Якщо ми перетягуємо існуючого
                 {
-                    UnitData data = GetNextAvailableUnit();
-                    if (data != null)
+                    MoveUnit(_unitToSwap, _unitToSwap.xPosition, _unitToSwap.yPosition, x, y);
+                    _unitToSwap = null;
+                }
+                else if (_unitToSpawn != null) // Якщо ми ставимо нового з меню
+                {
+                    if (GetAllUnits().Count < 6) 
                     {
-                        SpawnUnit(data, x, y, true);
-                        OnUnitPlaced();
+                        SpawnUnit(_unitToSpawn, x, y, true);
                     }
+                    else { Debug.Log("Максимум 6 юнітів!"); }
                 }
-                else 
-                {
-                    Debug.Log("Максимальна кількість військ (5) вже на полі!");
-                }
+            }
+            else if (unitOnTile.isPlayerUnit)
+            {
+                _unitToSwap = unitOnTile; // Вибираємо для перетягування
+                Debug.Log($"Вибрано {unitOnTile.unitName} для перенесення");
+            }
         }
-        // 3. Вибір для перестановки
-        else if (unitOnTile != null && unitOnTile.isPlayerUnit)
+        // --- ПКМ (1): Видалення в пул ---
+        else if (mouseButton == 1)
         {
-            _unitToSwap = unitOnTile;
-            Debug.Log($"Вибрано {unitOnTile.LogName} для перестановки. Оберіть вільну клітинку у своїй зоні.");
+            if (unitOnTile != null && unitOnTile.isPlayerUnit)
+            {
+                RemoveUnitAndRefund(unitOnTile, x, y);
+                _unitToSwap = null; // Про всяк випадок скидаємо вибір перетягування
+                Debug.Log("Юніта видалено ПКМ");
+            }
         }
     }
 }

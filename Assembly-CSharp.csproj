@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Bonuses\RegenerationAbility.cs" />
+    <Compile Include="Assets\Scripts\Systems\TurnsManager\PlacementButton.cs" />
     <Compile Include="Assets\Scripts\Bonuses\ElementBoostAbility.cs" />
     <Compile Include="Assets\Scripts\Units\UnitAbility.cs" />
     <Compile Include="Assets\Scripts\Units\Unit.cs" />
@@ -56,6 +57,7 @@
     <Compile Include="Assets\Scripts\Systems\CombatCalculator.cs" />
     <Compile Include="Assets\Scripts\UI\DamageText.cs" />
     <Compile Include="Assets\Scripts\Dice\DiceSystem.cs" />
+    <Compile Include="Assets\Scripts\Systems\Camera\CameraShake.cs" />
     <Compile Include="Assets\Scripts\Units\Attacks\Projectile.cs" />
     <Compile Include="Assets\Scripts\Cards\CardData.cs" />
     <Compile Include="Assets\Scripts\Field\Tile.cs" />
