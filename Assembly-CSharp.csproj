@@ -52,6 +52,7 @@
     <Compile Include="Assets\Scripts\Units\UnitAbility.cs" />
     <Compile Include="Assets\Scripts\Units\Unit.cs" />
     <Compile Include="Assets\Scripts\UI\HealthBar.cs" />
+    <Compile Include="Assets\Scripts\Cards\CardUI.cs" />
     <Compile Include="Assets\Scripts\Systems\GridManager.cs" />
     <Compile Include="Assets\Scripts\Systems\GameManager.cs" />
     <Compile Include="Assets\Scripts\Systems\CombatCalculator.cs" />
