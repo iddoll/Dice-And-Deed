@@ -166,13 +166,40 @@ public class Unit : MonoBehaviour
                 dtScript.Setup(damage);
             }
         }
-
+        
+        PlayHitEffect();
+        CameraShake.Instance.Shake(0.2f, 0.15f);
         if (IsDead() && isAlive)
         {
             isAlive = false;
             GridManager.Instance.ClearUnitFromGrid(xPosition, yPosition); // Звільняємо сітку
             Destroy(gameObject, 0.2f); // Невелике затримання для анімації цифр шкоди
         }
+    }
+    
+    public void PlayHitEffect()
+    {
+        StartCoroutine(HitEffectRoutine());
+    }
+
+    private System.Collections.IEnumerator HitEffectRoutine()
+    {
+        if (_sr == null) yield break;
+
+        Color currentBase = hasAction ? _baseColor : new Color(_baseColor.r * 0.5f, _baseColor.g * 0.5f, _baseColor.b * 0.5f, 1f);
+    
+        // 1. Фарбуємо в червоний
+        _sr.color = Color.red;
+
+        // 2. Робимо мікро-віддачу (knockback)
+        Vector3 shift = isPlayerUnit ? new Vector3(-0.15f, 0, 0) : new Vector3(0.15f, 0, 0);
+        transform.position += shift;
+
+        yield return new WaitForSeconds(0.15f);
+
+        // 3. Повертаємо все назад
+        _sr.color = currentBase;
+        transform.position -= shift;
     }
     
     public bool IsDead() => curentHealth <= 0;

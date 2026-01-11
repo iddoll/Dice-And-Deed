@@ -51,6 +51,20 @@ public class Tile : MonoBehaviour
             SetDim(false);
     }
 
+    // Додаємо цей метод, щоб ловити ПКМ
+    private void OnMouseOver()
+    {
+        // Перевіряємо ПКМ (індекс 1)
+        if (Input.GetMouseButtonDown(1))
+        {
+            if (GridManager.Instance.currentPhase == GamePhase.Placement)
+            {
+                // Викликаємо HandlePlacementClick з параметром mouseButton = 1
+                GridManager.Instance.HandlePlacementClick(x, y, 1);
+            }
+        }
+    }
+
     private void OnMouseDown()
     {
         if (GridManager.Instance.currentPhase == GamePhase.Placement)
@@ -62,7 +76,11 @@ public class Tile : MonoBehaviour
                 _startDragPosition = unitOnMe.transform.position;
                 _renderer.color = Color.yellow;
             }
-            else GridManager.Instance.HandlePlacementClick(x, y);
+            else 
+            {
+                // Для ЛКМ передаємо mouseButton = 0
+                GridManager.Instance.HandlePlacementClick(x, y, 0);
+            }
         }
         else HandleLeftClick();
     }
