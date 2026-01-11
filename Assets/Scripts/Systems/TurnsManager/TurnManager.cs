@@ -37,6 +37,12 @@ public class TurnManager : MonoBehaviour
     {
         _timer = turnDuration;
              
+        if (isPlayerTurn && _isBattleActive)
+        {
+            GridManager.Instance.AddMana(1); // Додаємо 1 ману кожен хід (або 3, як забажаєш)
+            GridManager.Instance.DrawCards(1); // Добираємо 1 карту з колоди в руку
+        }
+        
              // Якщо кнопки немає в інспекторі, шукаємо її за тегом або через GridManager
              if (endTurnButton == null && GridManager.Instance.endTurnButton != null)
              {
